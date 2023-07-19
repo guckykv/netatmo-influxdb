@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	client "github.com/influxdata/influxdb1-client/v2"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	influxapi "github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/joshuabeny1999/netatmo-api-go/v2"
 	"log"
 	"os"
@@ -15,13 +16,15 @@ import (
 var fConfig = flag.String("f", "netatmo.conf", "Configuration file")
 var verbose = flag.Bool("v", false, "verbose output")
 
-// API credentials
+// NetatmoConfig API credentials
 type NetatmoConfig struct {
 	ClientID     string
 	ClientSecret string
 	RefreshToken string
 	InfluxUrl    string
-	InfluxDBName string
+	InfluxToken  string
+	InfluxOrg    string
+	InfluxBucket string
 }
 
 var config NetatmoConfig
@@ -51,16 +54,14 @@ func main() {
 	}
 	ct := time.Now().UTC().Unix()
 
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  config.InfluxDBName,
-		Precision: "s",
-	})
+	client := influxdb2.NewClient(config.InfluxUrl, config.InfluxToken)
+	writeAPI := client.WriteAPI(config.InfluxOrg, config.InfluxBucket)
 
 	var numPoints = 0
 	for _, station := range devices.Stations() {
 		for _, module := range station.Modules() {
 
-			if writeModule2Influx(station, module, bp) {
+			if writeModule2Influx(station, module, writeAPI) {
 				numPoints++
 			}
 
@@ -81,15 +82,10 @@ func main() {
 
 	log.Printf("write %d points\n", numPoints)
 
-	influx := openInflux4netatmo()
-	err = influx.Write(bp)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_ = influx.Close()
+	client.Close()
 }
 
-func writeModule2Influx(station *netatmo.Device, module *netatmo.Device, bp client.BatchPoints) bool {
+func writeModule2Influx(station *netatmo.Device, module *netatmo.Device, writeAPI influxapi.WriteAPI) bool {
 	ts, data := module.Data()
 	updateDate := time.Unix(ts, 0)
 
@@ -110,39 +106,18 @@ func writeModule2Influx(station *netatmo.Device, module *netatmo.Device, bp clie
 		"module":  module.ModuleName,
 	}
 
-	point, err := client.NewPoint(
+	point := influxdb2.NewPoint(
 		"netatmo",
 		tags,
 		fields,
 		updateDate,
 	)
-	if err != nil {
-		log.Fatalln("Error: ", err)
-	}
-	bp.AddPoint(point)
+	writeAPI.WritePoint(point)
 	if *verbose {
 		fmt.Printf("addPoint(%v)\n", point)
 	}
 
 	return true
-}
-
-func openInflux4netatmo() (c client.Client) {
-
-	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr: config.InfluxUrl,
-	})
-	if err != nil {
-		fmt.Println("Error creating InfluxDB Client: ", err.Error())
-	} else {
-		defer func(c client.Client) {
-			err := c.Close()
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Error on Close: %s", err))
-			}
-		}(c)
-	}
-	return
 }
 
 func authenticate() (*netatmo.Client, error) {

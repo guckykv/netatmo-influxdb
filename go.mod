@@ -1,4 +1,4 @@
-module netatmo-v2
+module netatmo-influxdb
 
 go 1.20
 
@@ -9,7 +9,11 @@ require (
 )
 
 require (
+	github.com/deepmap/oapi-codegen v1.8.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/influxdata/influxdb-client-go/v2 v2.12.3 // indirect
+	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

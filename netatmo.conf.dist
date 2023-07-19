@@ -2,6 +2,8 @@ clientID      = "NETATMO_CLIENTID"
 clientSecret  = "NETATMO_CLIENTSECRET"
 RefreshToken  = "NETATMO_REFRESHTOKEN"
 InfluxUrl     = "INFLUX_URL"
-InfluxDBName  = "INFLUX_DBNAME"
+InfluxToken   = "INFLUX_TOKEN"
+InfluxOrg     = "INFLUX_ORG"
+InfluxBucket  = "INFLUX_BUCKET"
 
 
