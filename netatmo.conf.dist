@@ -1,9 +1,27 @@
+# Netatmo application credentials from https://dev.netatmo.com/apps
 clientID      = "NETATMO_CLIENTID"
 clientSecret  = "NETATMO_CLIENTSECRET"
+
+# Only needed for the very first start. Netatmo rotates refresh tokens, so from
+# then on the current token pair lives in the token file below and this value is
+# ignored. Generate one with scope read_station in the app's token generator.
 RefreshToken  = "NETATMO_REFRESHTOKEN"
+
+# Where to store the rotating access/refresh tokens. Written by the program, so
+# the directory must be writable by the user running it. A relative path is
+# resolved next to this config file. Default: netatmo-token.json
+#TokenFile    = "netatmo-token.json"
+
 InfluxUrl     = "INFLUX_URL"
+
+# InfluxDB 2.x
 InfluxToken   = "INFLUX_TOKEN"
 InfluxOrg     = "INFLUX_ORG"
 InfluxBucket  = "INFLUX_BUCKET"
 
-
+# InfluxDB 1.8+ instead: set InfluxDBName and leave InfluxOrg/InfluxBucket unset.
+# InfluxUser/InfluxPassword are only needed if the server requires auth.
+#InfluxDBName   = "smarthome"
+#InfluxRP       = "autogen"
+#InfluxUser     = ""
+#InfluxPassword = ""

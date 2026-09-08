@@ -1,5 +1,8 @@
 netatmo.conf
+netatmo-token.json
+*.tmp
 netatmo
 netatmo-pi
 netatmo-pi64
 .idea
+CLAUDE.md
